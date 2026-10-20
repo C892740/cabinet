@@ -74,7 +74,7 @@ async function main(): Promise<void> {
         players: r.players,
         rating: r.rating.toFixed(1),
         region: r.region,
-        sizeMb: r.sizeMb,
+        sizeMb: r.sizeMb.toFixed(2),
         description: r.description,
         favorite: r.favorite,
         playtimeHours: r.playtimeHours,
