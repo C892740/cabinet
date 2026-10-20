@@ -1,0 +1,53 @@
+# Dependabot — the project's caretaker.
+#
+# Keeps npm dependencies (across the workspaces) and GitHub Actions up to date,
+# groups routine minor/patch bumps to reduce noise, and lets majors through as
+# individual PRs so they can be reviewed properly. Security updates are always
+# ungrouped and never delayed.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    labels:
+      - dependencies
+      - npm
+    groups:
+      npm-minor-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    cooldown:
+      default-days: 5
+      semver-major-days: 30
+    commit-message:
+      prefix: deps
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    groups:
+      actions-minor-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: ci
+      include: scope

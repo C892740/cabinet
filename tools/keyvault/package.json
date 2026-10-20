@@ -1,0 +1,21 @@
+{
+  "name": "cabinet-keyvault",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI for the Cabinet encrypted admin-key vault: generate, seal and reveal the admin dashboard key-password.",
+  "type": "module",
+  "bin": {
+    "cabinet-keyvault": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@cabinet/core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.6",
+    "typescript": "^5.6.3"
+  }
+}

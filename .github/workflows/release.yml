@@ -1,0 +1,49 @@
+name: Release
+
+# Builds the real Windows installer (native Windows runner: full resource
+# editing, custom icon and version metadata — no Wine needed) and attaches it
+# to a GitHub Release whenever a version tag is pushed:
+#
+#   git tag v0.1.0 && git push origin v0.1.0
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Build Windows installer
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build shared packages
+        run: |
+          npm run build -w @cabinet/core
+          npm run build -w @cabinet/db
+
+      - name: Build installer (NSIS + portable)
+        run: npm run dist -w cabinet-desktop
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            apps/desktop/release/Cabinet-Setup-*.exe
+            apps/desktop/release/Cabinet-0.1.0-win32-x64-portable.zip
+          generate_release_notes: true

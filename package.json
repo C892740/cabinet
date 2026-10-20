@@ -1,0 +1,31 @@
+{
+  "name": "cabinet",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cabinet — a modern, self-hostable retro game library for web, desktop and TV.",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "apps/web",
+    "apps/desktop",
+    "packages/*",
+    "tools/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @cabinet/core && npm run build -w @cabinet/db && npm run build -w cabinet-web",
+    "dev": "npm run dev -w cabinet-web",
+    "typecheck": "npm run typecheck -w @cabinet/core && npm run typecheck -w @cabinet/db && npm run typecheck -w cabinet-web && npm run typecheck -w cabinet-keyvault && npm run typecheck -w cabinet-desktop",
+    "keyvault": "npm run build -w @cabinet/core >/dev/null && npm run build -w cabinet-keyvault >/dev/null && node tools/keyvault/dist/cli.js",
+    "test:keyvault": "npm run build -w @cabinet/core && npm run build -w cabinet-keyvault && node tools/keyvault/dist/cli.js selftest",
+    "desktop": "npm run start -w cabinet-desktop",
+    "desktop:dist": "npm run dist -w cabinet-desktop",
+    "db:generate": "npm run db:generate -w @cabinet/db",
+    "db:migrate": "npm run db:migrate -w @cabinet/db"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1",
+    "tsx": "^4.23.15"
+  }
+}

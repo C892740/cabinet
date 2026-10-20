@@ -1,0 +1,28 @@
+node_modules/
+dist/
+.next/
+out/
+build/
+!apps/desktop/build/
+coverage/
+*.tsbuildinfo
+
+# secrets — never commit
+.env
+.env.*
+!.env.example
+
+# desktop packaging output
+apps/desktop/release/
+apps/desktop/dist-electron/
+apps/tizen/release/
+
+# keyvault artifacts (these hold encrypted or plaintext keys)
+*.cabinet
+*.key.txt
+
+# misc
+.DS_Store
+Thumbs.db
+npm-debug.log*
+.vercel

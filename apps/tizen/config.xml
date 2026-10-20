@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+        xmlns:tizen="http://tizen.org/ns/widgets"
+        id="https://cabinet.app/tv"
+        version="0.1.0"
+        viewmodes="maximized">
+
+  <name>Cabinet TV</name>
+  <description>Cabinet game library — gamepad-first TV mode for two controllers.</description>
+  <icon src="icon.png"/>
+
+  <!-- Local fallback that redirects to the deployed TV Mode (see index.html). -->
+  <content src="index.html"/>
+
+  <!-- Primary start page: the deployed TV Mode on Vercel (same-origin with the
+       API, so no CORS setup is needed). build.mjs rewrites this URL. -->
+  <tizen:content src="https://cabinet.vercel.app/tv"/>
+
+  <tizen:application id="cabinet0tv.CabinetTV" package="cabinet0tv" required_version="5.5"/>
+  <tizen:profile name="tv"/>
+
+  <tizen:privilege name="http://tizen.org/privilege/internet"/>
+
+  <access origin="https://*.vercel.app" subdomains="true"/>
+  <tizen:allow-navigation>
+    <tizen:href>https://*.vercel.app</tizen:href>
+    <tizen:href>https://*.style.dev</tizen:href>
+  </tizen:allow-navigation>
+
+  <feature name="http://tizen.org/feature/screen.size.1080.1920"/>
+</widget>

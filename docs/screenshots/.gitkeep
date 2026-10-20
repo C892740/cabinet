@@ -1,0 +1,12 @@
+# Screenshots
+
+Captured from the running app (see `scripts/capture-screenshots.mjs`) and used
+by the top-level README.
+
+| File | Shows |
+| --- | --- |
+| `hero.png` | Landing page hero |
+| `library.png` | Library grid with generated covers |
+| `tv-mode.png` | TV Mode with controller UI |
+| `admin.png` | Admin dashboard |
+| `keyvault.png` | Encrypted key vault (desktop) |

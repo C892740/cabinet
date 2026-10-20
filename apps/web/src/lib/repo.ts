@@ -1,0 +1,221 @@
+/**
+ * Repository layer.
+ *
+ * One interface, two implementations:
+ *   • demo — in-memory dataset, so `npm run dev` works with zero setup
+ *   • neon — Drizzle ORM against Neon Postgres (see packages/db)
+ *
+ * The web app never talks to the database driver directly; that keeps the
+ * Vercel deployment and the future desktop sync path on the same contract.
+ */
+
+import type {
+  AdminStats,
+  Collection,
+  Platform,
+  Rom,
+  User,
+  UserRole,
+} from "./types";
+import { NeonRepo } from "./neon-repo";
+
+export interface RomFilter {
+  query?: string;
+  platform?: string;
+  favoritesOnly?: boolean;
+  sort?: "title" | "rating" | "recent" | "played";
+}
+
+export interface NewUser {
+  email: string;
+  displayName: string;
+  passwordHash: string;
+  role?: UserRole;
+}
+
+export interface UserWithSecret extends User {
+  passwordHash: string;
+}
+
+export interface Repo {
+  readonly kind: "demo" | "neon";
+
+  listPlatforms(): Promise<Platform[]>;
+  listRoms(filter?: RomFilter): Promise<Rom[]>;
+  getRom(id: string): Promise<Rom | null>;
+  toggleFavorite(id: string): Promise<Rom | null>;
+  listCollections(): Promise<Collection[]>;
+
+  findUserByEmail(email: string): Promise<UserWithSecret | null>;
+  findUserById(id: string): Promise<User | null>;
+  createUser(input: NewUser): Promise<User>;
+  listUsers(): Promise<User[]>;
+
+  createSession(userId: string, tokenHash: string, expiresAt: Date): Promise<void>;
+  findUserBySessionToken(tokenHash: string): Promise<User | null>;
+  deleteSession(tokenHash: string): Promise<void>;
+
+  stats(): Promise<AdminStats>;
+}
+
+let cached: Repo | null = null;
+
+export function getRepo(): Repo {
+  if (cached) return cached;
+  cached = process.env.DATABASE_URL ? createNeonRepo() : createDemoRepo();
+  return cached;
+}
+
+// ─── Demo implementation ────────────────────────────────────────────────────
+
+import {
+  collections as demoCollections,
+  platforms as demoPlatforms,
+  roms as demoRoms,
+} from "./demo-data";
+
+function createDemoRepo(): Repo {
+  const roms = new Map<string, Rom>(demoRoms.map((r) => [r.id, { ...r }]));
+  const users = new Map<string, UserWithSecret>();
+  const sessions = new Map<string, string>(); // tokenHash -> userId
+
+  // A ready-made admin account so the demo dashboard is reachable.
+  users.set("u_admin", {
+    id: "u_admin",
+    email: "admin@cabinet.local",
+    displayName: "Alex Admin",
+    role: "admin",
+    avatarHue: 265,
+    createdAt: new Date(2026, 0, 1).toISOString(),
+    passwordHash: "scrypt$32768$8$1$AAAAAAAAAAAAAAAAAAAAAA==$AAAA",
+  });
+
+  return {
+    kind: "demo",
+
+    async listPlatforms() {
+      return demoPlatforms.map((p) => ({
+        ...p,
+        romCount: [...roms.values()].filter((r) => r.platformSlug === p.slug).length,
+      }));
+    },
+
+    async listRoms(filter = {}) {
+      let list = [...roms.values()];
+      if (filter.platform) list = list.filter((r) => r.platformSlug === filter.platform);
+      if (filter.favoritesOnly) list = list.filter((r) => r.favorite);
+      if (filter.query) {
+        const q = filter.query.toLowerCase();
+        list = list.filter(
+          (r) =>
+            r.title.toLowerCase().includes(q) ||
+            r.genre.toLowerCase().includes(q) ||
+            r.platformSlug.includes(q),
+        );
+      }
+      switch (filter.sort) {
+        case "rating":
+          list.sort((a, b) => b.rating - a.rating);
+          break;
+        case "recent":
+          list.sort((a, b) => b.addedAt.localeCompare(a.addedAt));
+          break;
+        case "played":
+          list.sort((a, b) => (b.lastPlayedAt ?? "").localeCompare(a.lastPlayedAt ?? ""));
+          break;
+        default:
+          list.sort((a, b) => a.sortTitle.localeCompare(b.sortTitle));
+      }
+      return list;
+    },
+
+    async getRom(id) {
+      return roms.get(id) ?? null;
+    },
+
+    async toggleFavorite(id) {
+      const rom = roms.get(id);
+      if (!rom) return null;
+      rom.favorite = !rom.favorite;
+      return rom;
+    },
+
+    async listCollections() {
+      return demoCollections.map((c) => ({
+        ...c,
+        romIds: c.romIds.filter((id) => roms.has(id)),
+      }));
+    },
+
+    async findUserByEmail(email) {
+      const lower = email.toLowerCase();
+      for (const user of users.values()) {
+        if (user.email === lower) return user;
+      }
+      return null;
+    },
+
+    async findUserById(id) {
+      const user = users.get(id);
+      return user ?? null;
+    },
+
+    async createUser(input) {
+      const user: UserWithSecret = {
+        id: `u_${Math.random().toString(36).slice(2, 10)}`,
+        email: input.email.toLowerCase(),
+        displayName: input.displayName,
+        role: input.role ?? "user",
+        avatarHue: Math.floor(Math.random() * 360),
+        createdAt: new Date().toISOString(),
+        passwordHash: input.passwordHash,
+      };
+      users.set(user.id, user);
+      return user;
+    },
+
+    async listUsers() {
+      return [...users.values()].map(({ passwordHash: _pw, ...user }) => user);
+    },
+
+    async createSession(_userId, tokenHash, _expiresAt) {
+      sessions.set(tokenHash, _userId);
+    },
+
+    async findUserBySessionToken(tokenHash) {
+      const userId = sessions.get(tokenHash);
+      if (!userId) return null;
+      const user = users.get(userId);
+      if (!user) return null;
+      const { passwordHash: _pw, ...rest } = user;
+      return rest;
+    },
+
+    async deleteSession(tokenHash) {
+      sessions.delete(tokenHash);
+    },
+
+    async stats() {
+      const all = [...roms.values()];
+      return {
+        totalUsers: users.size,
+        totalRoms: all.length,
+        totalPlatforms: demoPlatforms.length,
+        totalPlaytimeHours: all.reduce((sum, r) => sum + r.playtimeHours, 0),
+        storageMb: Math.round(all.reduce((sum, r) => sum + r.sizeMb, 0)),
+        recentEvents: [
+          { id: "e1", action: "Library scan completed — 3 new games", actorEmail: "admin@cabinet.local", createdAt: new Date(Date.now() - 1000 * 60 * 22).toISOString() },
+          { id: "e2", action: "Metadata refreshed from IGDB", actorEmail: "system@cabinet.local", createdAt: new Date(Date.now() - 1000 * 60 * 96).toISOString() },
+          { id: "e3", action: "New user registered", actorEmail: "sam@example.com", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString() },
+          { id: "e4", action: "Admin dashboard unlocked", actorEmail: "admin@cabinet.local", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 9).toISOString() },
+        ],
+      };
+    },
+  };
+}
+
+// ─── Neon implementation ────────────────────────────────────────────────────
+
+function createNeonRepo(): Repo {
+  return new NeonRepo();
+}

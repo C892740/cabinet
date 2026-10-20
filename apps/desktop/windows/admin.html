@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+    <title>Unlock admin dashboard</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 34px 30px;
+        background:
+          radial-gradient(500px 260px at 80% -10%, rgba(139, 92, 246, 0.25), transparent 60%),
+          #0b0b12;
+        color: #f5f5f7;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-align: center;
+      }
+      .lock {
+        width: 64px; height: 64px; margin: 0 auto;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #6366f1, #d946ef);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px;
+        box-shadow: 0 16px 50px rgba(139, 92, 246, 0.45);
+      }
+      h1 { font-size: 20px; margin: 18px 0 8px; letter-spacing: -0.02em; }
+      p { color: rgba(255, 255, 255, 0.55); font-size: 13px; line-height: 1.65; margin: 0 0 22px; }
+      input {
+        width: 100%;
+        padding: 13px 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        font-size: 14px;
+        outline: none;
+        text-align: center;
+      }
+      input:focus { border-color: rgba(167, 139, 250, 0.7); }
+      button {
+        width: 100%;
+        margin-top: 16px;
+        border: 0;
+        border-radius: 999px;
+        padding: 13px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #fff;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6 42%, #d946ef);
+        box-shadow: 0 12px 36px rgba(139, 92, 246, 0.4);
+        transition: transform 0.2s ease;
+      }
+      button:hover { transform: scale(1.02); }
+      button:disabled { opacity: 0.5; cursor: default; }
+      .status { margin-top: 14px; font-size: 12.5px; min-height: 18px; }
+      .status.err { color: #fda4af; }
+      .status.ok { color: #6ee7b7; }
+      .hint {
+        margin-top: 24px;
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 11.5px;
+        color: rgba(255, 255, 255, 0.45);
+        line-height: 1.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="lock">🛡️</div>
+    <h1>Admin dashboard</h1>
+    <p>
+      Enter the admin key-password to continue.<br />
+      You can read it back from the encrypted vault (Cabinet → Key Vault…).
+    </p>
+
+    <input id="key" type="password" placeholder="Admin key-password" autocomplete="off" />
+    <button id="unlock">Unlock dashboard</button>
+    <div class="status" id="status"></div>
+
+    <div class="hint">
+      The key is verified by the server and exchanged for an 8-hour session —
+      it is never stored in the desktop app.
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      async function unlock() {
+        const button = $("unlock");
+        button.disabled = true;
+        $("status").textContent = "";
+        try {
+          const result = await window.cabinet.unlockAdmin($("key").value);
+          if (result.ok) {
+            $("status").className = "status ok";
+            $("status").textContent = "Unlocked — opening the dashboard…";
+            setTimeout(() => window.close(), 700);
+          } else {
+            $("status").className = "status err";
+            $("status").textContent =
+              result.error === "missing-config"
+                ? "This server has no admin key configured (ADMIN_KEY / ADMIN_KEY_HASH)."
+                : result.error === "unreachable"
+                  ? "Could not reach the Cabinet server."
+                  : "That key doesn't match. Try again.";
+          }
+        } catch (error) {
+          $("status").className = "status err";
+          $("status").textContent = String(error);
+        } finally {
+          button.disabled = false;
+        }
+      }
+      $("unlock").onclick = unlock;
+      $("key").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") unlock();
+      });
+      $("key").focus();
+    </script>
+  </body>
+</html>

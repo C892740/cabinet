@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cabinet TV</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0b0b12;
+        color: #fff;
+        font-family: sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <p>Starting Cabinet TV…</p>
+      <p id="hint" style="color: #888"></p>
+    </div>
+    <script>
+      // Fallback boot: the widget normally starts at the remote URL baked in by
+      // build.mjs. If it ever lands here, jump to the deployed TV Mode.
+      var TARGET = "https://cabinet.vercel.app/tv";
+      document.getElementById("hint").textContent = TARGET;
+      setTimeout(function () {
+        location.replace(TARGET);
+      }, 400);
+    </script>
+  </body>
+</html>

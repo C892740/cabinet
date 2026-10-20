@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+    <title>Cabinet Key Vault</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --accent: linear-gradient(135deg, #6366f1, #8b5cf6 42%, #d946ef);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 28px;
+        background:
+          radial-gradient(700px 320px at 85% -10%, rgba(139, 92, 246, 0.22), transparent 60%),
+          radial-gradient(500px 260px at 5% 5%, rgba(56, 189, 248, 0.12), transparent 60%),
+          #0b0b12;
+        color: #f5f5f7;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      h1 { font-size: 21px; margin: 0; letter-spacing: -0.02em; }
+      .sub { color: rgba(255, 255, 255, 0.55); font-size: 13px; line-height: 1.6; margin: 8px 0 22px; }
+      .card {
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 22px;
+        padding: 20px;
+        margin-bottom: 14px;
+        backdrop-filter: blur(20px);
+      }
+      label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255, 255, 255, 0.45); margin: 0 0 8px 2px; }
+      .row { display: flex; gap: 10px; }
+      input {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        font-size: 13.5px;
+        outline: none;
+      }
+      input:focus { border-color: rgba(167, 139, 250, 0.7); }
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 11px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #fff;
+        background: var(--accent);
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      button:hover { transform: scale(1.03); box-shadow: 0 14px 40px rgba(139, 92, 246, 0.5); }
+      button:active { transform: scale(0.98); }
+      button.ghost {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: none;
+      }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+      .status { font-size: 12.5px; margin-top: 12px; min-height: 18px; }
+      .status.ok { color: #6ee7b7; }
+      .status.err { color: #fda4af; }
+      .reveal {
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 16px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(52, 211, 153, 0.3);
+        display: none;
+      }
+      .reveal.visible { display: block; }
+      .reveal code {
+        display: block;
+        word-break: break-all;
+        font-size: 13px;
+        background: rgba(0, 0, 0, 0.35);
+        border-radius: 10px;
+        padding: 12px;
+        margin: 10px 0;
+      }
+      .meta { font-size: 12px; color: rgba(255, 255, 255, 0.5); line-height: 1.8; }
+      .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 10.5px;
+        font-weight: 600;
+        background: rgba(139, 92, 246, 0.22);
+        color: #ddd6fe;
+        margin-right: 6px;
+      }
+      h2 { font-size: 14px; margin: 0 0 12px; letter-spacing: -0.01em; }
+    </style>
+  </head>
+  <body>
+    <h1>🔐 Cabinet Key Vault</h1>
+    <p class="sub">
+      The admin dashboard key-password, encrypted at rest with AES-256-GCM and hardened
+      with scrypt. It converts back to readable form only when your master passphrase
+      opens the vault.
+    </p>
+
+    <div class="card">
+      <h2>Vault file</h2>
+      <label for="file">Path to the .cabinet vault</label>
+      <div class="row">
+        <input id="file" placeholder="e.g. C:\Users\you\Documents\admin.cabinet" />
+        <button class="ghost" id="browse">Browse…</button>
+      </div>
+      <div class="meta" id="vaultMeta" style="margin-top: 12px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Master passphrase</h2>
+      <label for="pass">Passphrase (min. 8 characters)</label>
+      <input id="pass" type="password" placeholder="••••••••••••" />
+      <label for="confirm" style="margin-top: 12px">Confirm passphrase</label>
+      <input id="confirm" type="password" placeholder="••••••••••••" />
+    </div>
+
+    <div class="card">
+      <h2>Admin key</h2>
+      <label for="secret">Key-password (plaintext — only while sealing)</label>
+      <div class="row">
+        <input id="secret" placeholder="Generate one, or paste your existing admin key" />
+        <button class="ghost" id="generate">Generate</button>
+      </div>
+      <div class="actions">
+        <button id="seal">Encrypt into vault</button>
+        <button class="ghost" id="reveal">Open vault</button>
+        <button class="ghost" id="inspect">Inspect metadata</button>
+      </div>
+      <div class="status" id="status"></div>
+
+      <div class="reveal" id="revealBox">
+        <strong>Readable admin key</strong>
+        <code id="revealed"></code>
+        <button id="copy">Copy to clipboard</button>
+        <span class="status ok" style="margin-left: 10px">Shown in memory only — nothing is written to disk.</span>
+      </div>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const status = (message, ok = true) => {
+        const el = $("status");
+        el.textContent = message;
+        el.className = "status " + (ok ? "ok" : "err");
+      };
+
+      $("browse").onclick = async () => {
+        const picked = await window.cabinet.pickFile([
+          { name: "Cabinet key vault", extensions: ["cabinet"] },
+          { name: "All files", extensions: ["*"] },
+        ]);
+        if (picked) {
+          $("file").value = picked;
+          $("inspect").click();
+        }
+      };
+
+      $("generate").onclick = async () => {
+        $("secret").value = await window.cabinet.generateKey();
+        status("Strong admin key generated. Seal it into a vault to store it safely.");
+      };
+
+      $("seal").onclick = async () => {
+        try {
+          const pass = $("pass").value;
+          if (pass.length < 8) throw new Error("Master passphrase must be at least 8 characters.");
+          if (pass !== $("confirm").value) throw new Error("Passphrases do not match.");
+          if (!$("secret").value) throw new Error("Generate or paste an admin key first.");
+
+          let filePath = $("file").value.trim();
+          if (!filePath) {
+            filePath = (await window.cabinet.pickSave("admin.cabinet")) ?? "";
+            if (!filePath) return;
+            $("file").value = filePath;
+          }
+
+          const header = await window.cabinet.sealVault({
+            filePath,
+            plaintext: $("secret").value,
+            passphrase: pass,
+            label: "admin-dashboard-key",
+          });
+          $("secret").value = "";
+          renderMeta(header);
+          status("Vault sealed. The admin key now exists only as ciphertext on disk.");
+        } catch (error) {
+          status(error.message ?? String(error), false);
+        }
+      };
+
+      $("reveal").onclick = async () => {
+        try {
+          $("revealBox").classList.remove("visible");
+          const filePath = $("file").value.trim();
+          if (!filePath) throw new Error("Choose a vault file first.");
+          const revealed = await window.cabinet.revealVault({
+            filePath,
+            passphrase: $("pass").value,
+          });
+          $("revealed").textContent = revealed;
+          $("revealBox").classList.add("visible");
+          status("Vault opened — the key is readable below.");
+        } catch (error) {
+          status(error.message ?? String(error), false);
+        }
+      };
+
+      $("inspect").onclick = async () => {
+        try {
+          const filePath = $("file").value.trim();
+          if (!filePath) throw new Error("Choose a vault file first.");
+          renderMeta(await window.cabinet.inspectVault(filePath));
+          status("Vault metadata loaded.");
+        } catch (error) {
+          status(error.message ?? String(error), false);
+        }
+      };
+
+      $("copy").onclick = async () => {
+        await navigator.clipboard.writeText($("revealed").textContent);
+        status("Copied to clipboard.");
+      };
+
+      function renderMeta(header) {
+        $("vaultMeta").innerHTML =
+          '<span class="badge">' + header.cipher.name + "</span>" +
+          '<span class="badge">' + header.kdf.name + " N=" + header.kdf.N + "</span>" +
+          '<span class="badge">label: ' + header.label + "</span>" +
+          "<br/>Created " + new Date(header.createdAt).toLocaleString();
+      }
+    </script>
+  </body>
+</html>

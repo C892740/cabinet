@@ -1,0 +1,35 @@
+{
+  "name": "@cabinet/db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Drizzle ORM schema + Neon Postgres client for Cabinet.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "drizzle-orm": "^0.36.3",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.6",
+    "drizzle-kit": "^0.28.0",
+    "typescript": "^5.6.3"
+  }
+}

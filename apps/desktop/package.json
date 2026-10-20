@@ -1,0 +1,59 @@
+{
+  "name": "cabinet-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Cabinet",
+  "description": "Cabinet Desktop — Windows app with ROM folder scanning, emulator launching and the encrypted admin key vault.",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win"
+  },
+  "dependencies": {
+    "@cabinet/core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.6",
+    "electron": "33.4.11",
+    "electron-builder": "^26.15.3",
+    "typescript": "^5.6.3"
+  },
+  "build": {
+    "appId": "app.cabinet.desktop",
+    "productName": "Cabinet",
+    "files": [
+      "dist-electron/**/*",
+      "windows/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Cabinet-Setup-${version}.exe",
+      "signAndEditExecutable": false
+    },
+    "npmRebuild": false,
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Cabinet"
+    }
+  }
+}

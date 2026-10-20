@@ -1,0 +1,9 @@
+{
+  "name": "cabinet-tv-tizen",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cabinet TV — Samsung Tizen widget for gamepad-first TV Mode.",
+  "scripts": {
+    "build": "node make-icon.mjs && node build.mjs"
+  }
+}
