@@ -27,3 +27,4 @@ apps/tizen/release/
 Thumbs.db
 npm-debug.log*
 .vercel
+.env*

@@ -1,0 +1,26 @@
+# Vercel upload exclusions.
+#
+# Every npm workspace directory (apps/web, apps/desktop, packages/*, tools/*)
+# must stay present so `npm ci` at the repo root validates the lockfile — we
+# only strip build outputs, secrets and things the web build never reads.
+
+# Secrets must never leave this machine.
+/secrets/
+
+# Dependency installs happen remotely.
+node_modules/
+**/node_modules/
+
+# Build artifacts (rebuilt on Vercel or irrelevant to the web app).
+apps/web/.next/
+apps/web/tsconfig.tsbuildinfo
+apps/desktop/release/
+apps/desktop/dist-electron/
+packages/*/dist/
+
+# Not part of the web deployment. NOTE: patterns are anchored to the repo root
+# so package-level folders like packages/core/scripts/ stay included.
+/apps/tizen/
+/docs/
+/scripts/
+*.log
