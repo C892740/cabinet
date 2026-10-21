@@ -23,4 +23,5 @@ packages/*/dist/
 /apps/tizen/
 /docs/
 /scripts/
+/artifacts/
 *.log
