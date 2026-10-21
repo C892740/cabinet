@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { RomModal } from "../app/RomModal";
 import { CloseIcon } from "../Icons";
 import { PS5Shell } from "./PS5Shell";
+import { Ps2Shell } from "./Ps2Shell";
 import { NintendoShell } from "./NintendoShell";
 import { DualScreenShell } from "./DualScreenShell";
 import { XmbShell } from "./XmbShell";
@@ -64,6 +65,7 @@ export function ShellStage({
   return (
     <div>
       {shell === "ps5" && <PS5Shell {...shared} />}
+      {shell === "ps2" && <Ps2Shell {...shared} />}
       {shell === "nintendo" && <NintendoShell {...shared} />}
       {shell === "dual" && <DualScreenShell {...shared} />}
       {shell === "xmb" && <XmbShell {...shared} />}

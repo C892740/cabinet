@@ -9,7 +9,7 @@ const base = process.argv[2] ?? "http://127.0.0.1:3000";
 const out = "artifacts/shells";
 mkdirSync(out, { recursive: true });
 
-const shells = ["ps5", "nintendo", "dual", "xmb"];
+const shells = ["ps5", "ps2", "nintendo", "dual", "xmb"];
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });

@@ -6,7 +6,7 @@
  * and opens the same rom dialog — only the navigation grammar changes.
  */
 
-export type ShellId = "classic" | "ps5" | "nintendo" | "dual" | "xmb";
+export type ShellId = "classic" | "ps5" | "ps2" | "nintendo" | "dual" | "xmb";
 
 export interface ShellDescriptor {
   id: ShellId;
@@ -24,6 +24,13 @@ export const SHELLS: ShellDescriptor[] = [
     inspiration: "PS5 home screen",
     blurb: "Games rail, full-bleed hero art, clock in the corner — the living-room default.",
     accent: "#4b8dff",
+  },
+  {
+    id: "ps2",
+    name: "PlayStation 2",
+    inspiration: "PS2 system menu",
+    blurb: "Rows of icons over blue light shafts — the disc-era console boot screen.",
+    accent: "#4b7bd4",
   },
   {
     id: "nintendo",
