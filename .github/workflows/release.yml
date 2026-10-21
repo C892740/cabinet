@@ -41,7 +41,7 @@ jobs:
         run: npm run dist -w cabinet-desktop
 
       - name: Upload to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             apps/desktop/release/Cabinet-Setup-*.exe
