@@ -13,7 +13,10 @@
 import { createHash, randomBytes } from "node:crypto";
 import { createDb, users, platforms, roms, collections, collectionItems, adminEvents } from "@cabinet/db";
 import { collections as demoCollections, platforms as demoPlatforms, roms as demoRoms } from "../src/lib/demo-data";
+import { resolveCover } from "../src/lib/covers";
+import { summaryFor } from "../src/lib/enrich";
 import { hashPassword } from "../src/lib/password";
+import { sql } from "drizzle-orm";
 
 /** Deterministic UUID (v4-shaped) from any stable string key. */
 function uuidFromKey(key: string): string {
@@ -82,10 +85,22 @@ async function main(): Promise<void> {
         coverSeed: r.coverSeed,
         filePath: r.filePath,
         addedAt: new Date(r.addedAt),
+        // Automatic cover pipeline: real box art where a source has it,
+        // generated artwork otherwise (see apps/web/src/lib/covers.ts).
+        coverUrl: resolveCover(r).coverUrl,
+        coverProvider: resolveCover(r).coverProvider,
+        achievementsSummary: summaryFor(r),
       })),
     )
-    .onConflictDoNothing();
-  console.log(`✔ ${demoRoms.length} roms seeded`);
+    .onConflictDoUpdate({
+      target: roms.id,
+      set: {
+        coverUrl: sql`excluded.cover_url`,
+        coverProvider: sql`excluded.cover_provider`,
+        achievementsSummary: sql`excluded.achievements_summary`,
+      },
+    });
+  console.log(`✔ ${demoRoms.length} roms seeded (covers resolved)`);
 
   // 4) Collections + membership
   for (const collection of demoCollections) {

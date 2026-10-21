@@ -32,6 +32,66 @@ export interface Platform {
 
 export type RomRegion = "USA" | "Europe" | "Japan" | "World" | "Beta";
 
+/** Where a rom's cover image came from. */
+export type CoverProvider = "retroachievements" | "libretro" | "generated";
+
+/** Source of achievement data. */
+export type AchievementSource = "retroachievements" | "demo";
+
+/** Trophy-style tier derived from the achievement's point value. */
+export type AchievementTier = "bronze" | "silver" | "gold" | "platinum";
+
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  points: number;
+  tier: AchievementTier;
+  /** Absolute URL of the badge artwork. */
+  badgeUrl: string;
+  unlocked: boolean;
+  unlockedAt: string | null;
+  /** Earned in hardcore mode (no save states). */
+  hardcore: boolean;
+  /** Percentage of tracked players who earned this (lower = rarer). */
+  rarityPct: number | null;
+  /**
+   * Hidden until the player reveals it — the PS5 "Hidden Trophy" treatment.
+   * RetroAchievements has no native secret flag, so Cabinet derives it from
+   * the per-user spoiler setting: locked achievements render as secret when
+   * spoilers are off.
+   */
+  secret: boolean;
+}
+
+/** Compact progress summary embedded in library listings. */
+export interface AchievementSummary {
+  source: AchievementSource;
+  raGameId: number | null;
+  total: number;
+  unlocked: number;
+  pointsEarned: number;
+  pointsTotal: number;
+  completionPct: number;
+}
+
+/** Full achievement set for one rom (the PS5 trophy screen). */
+export interface AchievementSet {
+  source: AchievementSource;
+  raGameId: number | null;
+  gameTitle: string;
+  consoleName: string;
+  boxArtUrl: string | null;
+  total: number;
+  unlocked: number;
+  hardcoreUnlocked: number;
+  pointsEarned: number;
+  pointsTotal: number;
+  completionPct: number;
+  achievements: Achievement[];
+  fetchedAt: string;
+}
+
 export interface Rom {
   id: string;
   title: string;
@@ -55,6 +115,13 @@ export interface Rom {
   /** Relative path of the ROM inside the user's library folder. */
   filePath: string;
   addedAt: string;
+  /** Resolved cover artwork URL, or null to use the generated cover. */
+  coverUrl: string | null;
+  coverProvider: CoverProvider;
+  /** RetroAchievements game id when the title has been matched. */
+  raGameId: number | null;
+  /** Achievement progress summary when available. */
+  achievements?: AchievementSummary | null;
 }
 
 export interface Collection {

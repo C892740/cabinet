@@ -46,6 +46,9 @@ function makeRom(input: RomInput, index: number): Rom {
     coverSeed: 1000 + index * 7,
     filePath: `/${input.platformSlug}/${input.title}.zip`,
     addedAt: new Date(2026, 0, 5 + index).toISOString(),
+    coverUrl: null,
+    coverProvider: "generated",
+    raGameId: null,
     ...input,
   };
 }

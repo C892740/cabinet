@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   },
   description: site.description,
   applicationName: site.name,
+  icons: {
+    icon: [
+      { url: "/brand/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/brand/cabinet-mark.svg",
+  },
   keywords: ["roms", "retro games", "game library", "self-hosted", "emulation", "game collection"],
   openGraph: {
     title: `${site.name} — ${site.tagline}`,

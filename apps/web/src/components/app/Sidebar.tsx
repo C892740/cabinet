@@ -6,6 +6,7 @@ import type { ComponentType } from "react";
 import {
   CollectionsIcon,
   CpuIcon,
+  GamepadIcon,
   HomeIcon,
   LibraryIcon,
   ShieldIcon,
@@ -24,6 +25,7 @@ const nav: {
   { href: "/collections", label: "Collections", icon: CollectionsIcon },
   { href: "/emulators", label: "Emulators", icon: CpuIcon, badge: "Soon" },
   { href: "/tv", label: "TV Mode", icon: TvIcon },
+  { href: "/shell", label: "Layouts", icon: GamepadIcon, badge: "New" },
 ];
 
 export function Sidebar() {

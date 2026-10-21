@@ -7,4 +7,10 @@ export type {
   AdminStats,
   AdminEvent,
   UserRole,
+  CoverProvider,
+  AchievementSource,
+  AchievementTier,
+  Achievement,
+  AchievementSummary,
+  AchievementSet,
 } from "@cabinet/core";

@@ -8,6 +8,20 @@
       "when": 1792520118148,
       "tag": "0000_chief_omega_flight",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792544828634,
+      "tag": "0001_thick_shinobi_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792545242100,
+      "tag": "0002_hot_wildside",
+      "breakpoints": true
     }
   ]
 }

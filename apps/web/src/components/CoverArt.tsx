@@ -41,12 +41,14 @@ export function CoverArt({
   className = "",
   rounded = "rounded-2xl",
   showBadge = true,
+  showTitle = true,
 }: {
   rom: Rom;
   platform: Platform;
   className?: string;
   rounded?: string;
   showBadge?: boolean;
+  showTitle?: boolean;
 }) {
   const motif = MOTIFS[rom.coverSeed % MOTIFS.length];
   const long = rom.title.length > 26;
@@ -84,17 +86,19 @@ export function CoverArt({
         ★ {rom.rating.toFixed(1)}
       </span>
 
-      <div className="absolute inset-x-0 bottom-0 p-[7%]">
-        <h3
-          className="font-semibold leading-[1.15] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
-          style={{ fontSize: titleSize }}
-        >
-          {rom.title}
-        </h3>
-        <p className="mt-[3%] text-white/70" style={{ fontSize: "clamp(8px, 3.4cqw, 12px)" }}>
-          {rom.year} · {rom.genre}
-        </p>
-      </div>
+      {showTitle && (
+        <div className="absolute inset-x-0 bottom-0 p-[7%]">
+          <h3
+            className="font-semibold leading-[1.15] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
+            style={{ fontSize: titleSize }}
+          >
+            {rom.title}
+          </h3>
+          <p className="mt-[3%] text-white/70" style={{ fontSize: "clamp(8px, 3.4cqw, 12px)" }}>
+            {rom.year} · {rom.genre}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

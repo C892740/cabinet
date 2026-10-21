@@ -12,6 +12,7 @@ const mobileLinks = [
   { href: "/collections", label: "Collections" },
   { href: "/tv", label: "TV" },
   { href: "/emulators", label: "Emulators" },
+  { href: "/shell", label: "Layouts" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

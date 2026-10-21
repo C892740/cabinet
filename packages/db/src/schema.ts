@@ -89,6 +89,13 @@ export const roms = pgTable(
     coverSeed: integer("cover_seed").notNull().default(0),
     filePath: text("file_path").notNull().default(""),
     addedAt: timestamp("added_at", { withTimezone: true }).notNull().defaultNow(),
+    // Cover art + RetroAchievements linkage (see apps/web/src/lib/covers.ts).
+    coverUrl: text("cover_url"),
+    coverProvider: varchar("cover_provider", { length: 20 }).notNull().default("generated"),
+    raGameId: integer("ra_game_id"),
+    raConsoleId: integer("ra_console_id"),
+    // Cached AchievementSummary so listings never fan out to the RA API.
+    achievementsSummary: jsonb("achievements_summary"),
   },
   (table) => [
     index("roms_platform_idx").on(table.platformSlug),
@@ -131,9 +138,21 @@ export const adminEvents = pgTable(
   (table) => [index("admin_events_created_idx").on(table.createdAt)],
 );
 
+/**
+ * Cached third-party payloads (RetroAchievements game sets, console lists…).
+ * RA's docs ask clients to cache aggressively; this keeps serverless calls
+ * cold-start friendly and rate-limit polite.
+ */
+export const raCache = pgTable("ra_cache", {
+  key: varchar("key", { length: 160 }).primaryKey(),
+  payload: jsonb("payload").notNull(),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type UserRow = typeof users.$inferSelect;
 export type SessionRow = typeof sessions.$inferSelect;
 export type PlatformRow = typeof platforms.$inferSelect;
 export type RomRow = typeof roms.$inferSelect;
 export type CollectionRow = typeof collections.$inferSelect;
 export type AdminEventRow = typeof adminEvents.$inferSelect;
+export type RaCacheRow = typeof raCache.$inferSelect;

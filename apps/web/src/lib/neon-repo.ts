@@ -17,13 +17,17 @@ import {
   type CabinetDb,
 } from "@cabinet/db";
 import type {
+  AchievementSet,
+  AchievementSummary,
   AdminStats,
   Collection,
+  CoverProvider,
   Platform,
   Rom,
   User,
 } from "./types";
-import type { NewUser, Repo, RomFilter, UserWithSecret } from "./repo";
+import type { NewRom, NewUser, Repo, RomFilter, UserWithSecret } from "./repo";
+import { buildAchievementSet, enrichRom, summaryFor, type RomMetadataPatch } from "./enrich";
 
 export class NeonRepo implements Repo {
   readonly kind = "neon" as const;
@@ -89,6 +93,51 @@ export class NeonRepo implements Repo {
     const [row] = await this.db
       .update(roms)
       .set({ favorite: sql`not ${roms.favorite}` })
+      .where(eq(roms.id, id))
+      .returning();
+    return row ? toRom(row) : null;
+  }
+
+  async createRom(input: NewRom): Promise<Rom> {
+    const sortTitle = input.title.replace(/^(the|a|an) /i, "").toLowerCase();
+    const [row] = await this.db
+      .insert(roms)
+      .values({
+        title: input.title,
+        sortTitle,
+        platformSlug: input.platformSlug,
+        year: input.year,
+        genre: input.genre,
+        players: input.players ?? 1,
+        rating: String(input.rating ?? 8),
+        region: input.region ?? "USA",
+        sizeMb: String(input.sizeMb ?? 1),
+        description: input.description ?? "",
+        filePath: input.filePath ?? `/${input.platformSlug}/${input.title}.zip`,
+        coverSeed: Math.floor(Math.random() * 10000),
+      })
+      .returning();
+    const rom = toRom(row!);
+    // Cover art + achievements resolve automatically on add.
+    const patch = await enrichRom(rom);
+    return (await this.updateRomMetadata(rom.id, patch)) ?? rom;
+  }
+
+  async getAchievements(id: string): Promise<AchievementSet | null> {
+    const rom = await this.getRom(id);
+    return rom ? buildAchievementSet(rom) : null;
+  }
+
+  async updateRomMetadata(id: string, patch: Partial<RomMetadataPatch>): Promise<Rom | null> {
+    const values: Record<string, unknown> = {};
+    if (patch.coverUrl !== undefined) values.coverUrl = patch.coverUrl;
+    if (patch.coverProvider !== undefined) values.coverProvider = patch.coverProvider;
+    if (patch.raGameId !== undefined) values.raGameId = patch.raGameId;
+    if (patch.achievementsSummary !== undefined) values.achievementsSummary = patch.achievementsSummary;
+    if (Object.keys(values).length === 0) return this.getRom(id);
+    const [row] = await this.db
+      .update(roms)
+      .set(values)
       .where(eq(roms.id, id))
       .returning();
     return row ? toRom(row) : null;
@@ -224,6 +273,11 @@ type RomRow = {
   coverSeed: number;
   filePath: string;
   addedAt: Date;
+  coverUrl: string | null;
+  coverProvider: string;
+  raGameId: number | null;
+  raConsoleId: number | null;
+  achievementsSummary: unknown; // jsonb — cast in toRom
 };
 
 function toRom(row: RomRow): Rom {
@@ -232,8 +286,11 @@ function toRom(row: RomRow): Rom {
     rating: Number(row.rating),
     sizeMb: Number(row.sizeMb),
     region: row.region as Rom["region"],
+    coverProvider: row.coverProvider as CoverProvider,
     lastPlayedAt: row.lastPlayedAt ? row.lastPlayedAt.toISOString() : null,
     addedAt: row.addedAt.toISOString(),
+    achievements:
+      (row.achievementsSummary as AchievementSummary | null) ?? summaryFor(row as unknown as Rom),
   };
 }
 

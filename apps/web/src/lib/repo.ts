@@ -10,14 +10,17 @@
  */
 
 import type {
+  AchievementSet,
   AdminStats,
   Collection,
   Platform,
   Rom,
+  RomRegion,
   User,
   UserRole,
 } from "./types";
 import { NeonRepo } from "./neon-repo";
+import { summaryFor, enrichRom, buildAchievementSet, type RomMetadataPatch } from "./enrich";
 
 export interface RomFilter {
   query?: string;
@@ -33,6 +36,19 @@ export interface NewUser {
   role?: UserRole;
 }
 
+export interface NewRom {
+  title: string;
+  platformSlug: string;
+  year: number;
+  genre: string;
+  players?: number;
+  rating?: number;
+  region?: RomRegion;
+  sizeMb?: number;
+  description?: string;
+  filePath?: string;
+}
+
 export interface UserWithSecret extends User {
   passwordHash: string;
 }
@@ -45,6 +61,13 @@ export interface Repo {
   getRom(id: string): Promise<Rom | null>;
   toggleFavorite(id: string): Promise<Rom | null>;
   listCollections(): Promise<Collection[]>;
+
+  /** Add a rom; cover art + achievements resolve automatically. */
+  createRom(input: NewRom): Promise<Rom>;
+  /** Full achievement set for a rom (RA data or demo fixtures). */
+  getAchievements(romId: string): Promise<AchievementSet | null>;
+  /** Persist the results of the metadata pipeline. */
+  updateRomMetadata(id: string, patch: Partial<RomMetadataPatch>): Promise<Rom | null>;
 
   findUserByEmail(email: string): Promise<UserWithSecret | null>;
   findUserById(id: string): Promise<User | null>;
@@ -123,14 +146,15 @@ function createDemoRepo(): Repo {
         case "played":
           list.sort((a, b) => (b.lastPlayedAt ?? "").localeCompare(a.lastPlayedAt ?? ""));
           break;
-        default:
-          list.sort((a, b) => a.sortTitle.localeCompare(b.sortTitle));
-      }
-      return list;
-    },
+      default:
+        list.sort((a, b) => a.sortTitle.localeCompare(b.sortTitle));
+    }
+    return list.map((rom) => ({ ...rom, achievements: summaryFor(rom) }));
+  },
 
     async getRom(id) {
-      return roms.get(id) ?? null;
+      const rom = roms.get(id);
+      return rom ? { ...rom, achievements: summaryFor(rom) } : null;
     },
 
     async toggleFavorite(id) {
@@ -138,6 +162,49 @@ function createDemoRepo(): Repo {
       if (!rom) return null;
       rom.favorite = !rom.favorite;
       return rom;
+    },
+
+    async createRom(input) {
+      const sortTitle = input.title.replace(/^(the|a|an) /i, "").toLowerCase();
+      const rom: Rom = {
+        id: `rom_${Math.random().toString(36).slice(2, 10)}`,
+        title: input.title,
+        sortTitle,
+        platformSlug: input.platformSlug,
+        year: input.year,
+        genre: input.genre,
+        players: input.players ?? 1,
+        rating: input.rating ?? 8,
+        region: input.region ?? "USA",
+        sizeMb: input.sizeMb ?? 1,
+        description: input.description ?? "",
+        favorite: false,
+        playtimeHours: 0,
+        lastPlayedAt: null,
+        coverSeed: Math.floor(Math.random() * 10000),
+        filePath: input.filePath ?? `/${input.platformSlug}/${input.title}.zip`,
+        addedAt: new Date().toISOString(),
+        coverUrl: null,
+        coverProvider: "generated",
+        raGameId: null,
+      };
+      // Cover art + achievements resolve automatically on add.
+      const patch = await enrichRom(rom);
+      Object.assign(rom, patch);
+      roms.set(rom.id, rom);
+      return { ...rom, achievements: summaryFor(rom) };
+    },
+
+    async getAchievements(id) {
+      const rom = roms.get(id);
+      return rom ? buildAchievementSet(rom) : null;
+    },
+
+    async updateRomMetadata(id, patch) {
+      const rom = roms.get(id);
+      if (!rom) return null;
+      Object.assign(rom, patch);
+      return { ...rom, achievements: summaryFor(rom) };
     },
 
     async listCollections() {

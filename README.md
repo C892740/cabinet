@@ -1,10 +1,12 @@
 <div align="center">
 
-<img src="docs/screenshots/hero.png" alt="Cabinet — your retro library, beautifully organized" width="100%" />
-
-# Cabinet
+<img src="docs/screenshots/hero.png" alt="Cabinet — your retro library, beautifully organized" width="100%" /><img src="apps/web/public/brand/cabinet-logo.svg" alt="Cabinet logo — the letter C drawn as a power symbol" width="360" />
 
 ### Your retro library, beautifully organized.
+
+> The logo hides its idea in the first letter: the **C** of Cabinet is the
+> universal power symbol — a circle open at the top, a stem through the gap.
+> A letter, and the button that powers on your library.
 
 A modern, self-hostable game library for **web, Windows and TV** — curated cover
 art, instant search, an encrypted admin vault, and a controller-first living-room

@@ -1,7 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { CoverArt } from "../CoverArt";
+import { RomCover } from "../RomCover";
+import { AchievementsPanel } from "../achievements/Achievements";
+import { coverProviderLabel } from "@/lib/covers";
 import {
   ClockIcon,
   CloseIcon,
@@ -65,12 +67,15 @@ export function RomModal({
 
             <div className="grid gap-0 md:grid-cols-[300px_1fr]">
               <div className="p-6 md:p-7">
-                <CoverArt
+                <RomCover
                   rom={rom}
                   platform={platform}
                   className="aspect-[3/4] shadow-card"
                   rounded="rounded-3xl"
                 />
+                <p className="mt-2 text-center text-[10px] text-white/35">
+                  {coverProviderLabel(rom.coverProvider)}
+                </p>
                 <div className="mt-5 grid grid-cols-2 gap-2.5">
                   <button type="button" className="btn-primary !px-4 !py-2.5 text-xs">
                     <PlayIcon size={14} />
@@ -127,6 +132,8 @@ export function RomModal({
                     </div>
                   ))}
                 </dl>
+
+                <AchievementsPanel rom={rom} />
 
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <button

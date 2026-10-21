@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { RomCard } from "./RomCard";
 import { RomModal } from "./RomModal";
+import { AddGameModal } from "./AddGameModal";
 import { FilterIcon, HeartIcon, SearchIcon, SparklesIcon } from "../Icons";
 import type { Platform, Rom } from "@/lib/types";
 
@@ -29,6 +30,7 @@ export function LibraryExplorer({
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [sort, setSort] = useState<SortKey>("title");
   const [selected, setSelected] = useState<Rom | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   const platformBySlug = useMemo(
     () => new Map(platforms.map((p) => [p.slug, p])),
@@ -88,6 +90,9 @@ export function LibraryExplorer({
         </div>
 
         <div className="flex w-full items-center gap-3 sm:w-auto">
+          <button type="button" onClick={() => setAddOpen(true)} className="btn-primary !px-5 !py-2.5 text-xs">
+            + Add game
+          </button>
           <div className="glass flex flex-1 items-center gap-2.5 rounded-full px-4 py-2.5 transition-colors focus-within:border-white/25 sm:w-72">
             <SearchIcon size={17} className="text-white/45" />
             <input
@@ -212,6 +217,13 @@ export function LibraryExplorer({
         platform={selected ? (platformBySlug.get(selected.platformSlug) ?? null) : null}
         onClose={() => setSelected(null)}
         onToggleFavorite={toggleFavorite}
+      />
+
+      <AddGameModal
+        open={addOpen}
+        platforms={platforms}
+        onClose={() => setAddOpen(false)}
+        onAdded={(rom) => setRoms((current) => [rom, ...current])}
       />
     </div>
   );
