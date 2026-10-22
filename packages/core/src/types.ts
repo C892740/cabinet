@@ -33,7 +33,12 @@ export interface Platform {
 export type RomRegion = "USA" | "Europe" | "Japan" | "World" | "Beta";
 
 /** Where a rom's cover image came from. */
-export type CoverProvider = "retroachievements" | "libretro" | "generated";
+export type CoverProvider =
+  | "retroachievements"
+  | "libretro"
+  | "igdb"
+  | "screenscraper"
+  | "generated";
 
 /** Source of achievement data. */
 export type AchievementSource = "retroachievements" | "demo";
@@ -122,6 +127,133 @@ export interface Rom {
   raGameId: number | null;
   /** Achievement progress summary when available. */
   achievements?: AchievementSummary | null;
+}
+
+// ─── Emulation: cores, save states, screenshots, history, profiles ─────────
+
+/** EmulatorJS core identifiers supported in the in-browser player. */
+export type EmulatorCoreId =
+  | "nes"
+  | "snes"
+  | "gb"
+  | "gba"
+  | "n64"
+  | "segaMD"
+  | "segaGG"
+  | "segaMS"
+  | "psx"
+  | "segaSaturn"
+  | "atari2600"
+  | "nds";
+
+/** How a play session ran. */
+export type PlaySource = "browser" | "desktop" | "tv";
+
+export interface SaveState {
+  id: string;
+  romId: string;
+  slot: number;
+  label: string;
+  core: string;
+  sizeBytes: number;
+  /** Base64 PNG thumbnail of the frame, when captured. */
+  thumbnail: string | null;
+  /** Base64 emulator state bytes (the load payload). */
+  state: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Screenshot {
+  id: string;
+  romId: string;
+  caption: string;
+  /** Base64 PNG image data. */
+  imageData: string;
+  createdAt: string;
+}
+
+export interface PlaySession {
+  id: string;
+  romId: string;
+  source: PlaySource;
+  startedAt: string;
+  endedAt: string | null;
+  durationSeconds: number;
+}
+
+/** A desktop emulator launch profile (one-click launch). */
+export interface EmulatorProfile {
+  id: string;
+  name: string;
+  /** Platform slug, or null for a catch-all profile. */
+  platformSlug: string | null;
+  emulatorPath: string;
+  corePath: string;
+  /** Argument template with {rom} {core} {emulator} {title} placeholders. */
+  argsTemplate: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ─── Netplay ───────────────────────────────────────────────────────────────
+
+export type NetplayRole = "host" | "guest";
+export type NetplayStatus = "lobby" | "live" | "closed";
+
+export interface NetplaySessionInfo {
+  code: string;
+  hostName: string;
+  gameTitle: string;
+  core: string;
+  romId: string | null;
+  status: NetplayStatus;
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface NetplaySignal {
+  seq: number;
+  fromRole: NetplayRole;
+  kind: "offer" | "answer" | "ice" | "bye" | "chat";
+  payload: unknown;
+  createdAt: string;
+}
+
+// ─── Metadata providers (IGDB, ScreenScraper) + ROM scanning ──────────────
+
+export type MetadataProvider = "igdb" | "screenscraper" | "none";
+export type MatchMethod = "hash" | "name" | "none";
+
+/** Which metadata providers are configured (booleans only). */
+export interface ProvidersStatus {
+  igdb: boolean;
+  screenscraper: boolean;
+}
+
+/** One file discovered by a library scan (hashes computed by the scanner). */
+export interface ScannedRomFile {
+  fileName: string;
+  sizeBytes: number;
+  platformSlug: string;
+  crc32?: string;
+  sha1?: string;
+}
+
+/** A metadata match returned by the server-side scan. */
+export interface MetadataMatch {
+  fileName: string;
+  provider: MetadataProvider;
+  matchMethod: MatchMethod;
+  externalId: string | null;
+  title: string | null;
+  description: string | null;
+  year: number | null;
+  genre: string | null;
+  players: number | null;
+  coverUrl: string | null;
+  screenshotUrls: string[];
 }
 
 export interface Collection {

@@ -1,31 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets"
         xmlns:tizen="http://tizen.org/ns/widgets"
-        id="https://cabinet.app/tv"
-        version="0.1.0"
+        id="https://cabinet.local/tv"
+        version="1.0.0"
         viewmodes="maximized">
 
-  <name>Cabinet TV</name>
-  <description>Cabinet game library — gamepad-first TV mode for two controllers.</description>
+  <name>Cabinet</name>
+  <description>Cabinet — your retro game library on Samsung TV.</description>
+  <author href="https://github.com/cabinet-roms/cabinet" email="dev@cabinet.local">Cabinet</author>
+
+  <!-- Packaged local shell (index.html): registers remote keys and loads the
+       hosted Cabinet TV app in a frame. A packaged entry (unlike a hosted app)
+       keeps the tv.inputdevice API available. -->
+  <content src="index.html"/>
   <icon src="icon.png"/>
 
-  <!-- Local fallback that redirects to the deployed TV Mode (see index.html). -->
-  <content src="index.html"/>
+  <tizen:application id="CabinetTv1.cabinet" package="CabinetTv1" required_version="5.5"/>
+  <tizen:profile name="tv-samsung"/>
 
-  <!-- Primary start page: the deployed TV Mode on Vercel (same-origin with the
-       API, so no CORS setup is needed). build.mjs rewrites this URL. -->
-  <tizen:content src="https://cabinet.vercel.app/tv"/>
-
-  <tizen:application id="cabinet0tv.CabinetTV" package="cabinet0tv" required_version="5.5"/>
-  <tizen:profile name="tv"/>
+  <!-- Network access for the hosted app + EmulatorJS CDN. -->
+  <access origin="https://cabinet-eta-gilt.vercel.app" subdomains="true"/>
+  <access origin="https://cdn.emulatorjs.org" subdomains="true"/>
+  <tizen:allow-navigation>cabinet-eta-gilt.vercel.app cdn.emulatorjs.org</tizen:allow-navigation>
 
   <tizen:privilege name="http://tizen.org/privilege/internet"/>
+  <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+  <tizen:privilege name="http://tizen.org/privilege/tizen.tv.inputdevice"/>
+  <tizen:privilege name="http://tizen.org/privilege/application.launch"/>
 
-  <access origin="https://*.vercel.app" subdomains="true"/>
-  <tizen:allow-navigation>
-    <tizen:href>https://*.vercel.app</tizen:href>
-    <tizen:href>https://*.style.dev</tizen:href>
-  </tizen:allow-navigation>
-
-  <feature name="http://tizen.org/feature/screen.size.1080.1920"/>
+  <tizen:setting screen-orientation="landscape"
+                 context-menu="disable"
+                 background-support="disable"
+                 encryption="disable"
+                 install-location="auto"
+                 hwkey-event="enable"/>
 </widget>

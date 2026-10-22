@@ -1,0 +1,58 @@
+name: Cabinet
+options:
+  bundleIdPrefix: com.cabinet
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+
+packages:
+  CabinetCore:
+    path: CabinetCore
+
+targets:
+  CabinetApp:
+    type: application
+    platform: iOS
+    sources:
+      - CabinetApp
+    dependencies:
+      - package: CabinetCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cabinet.app
+        PRODUCT_NAME: Cabinet
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.9"
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: "0.2.0"
+    info:
+      path: Generated/Info.plist
+      properties:
+        CFBundleDisplayName: Cabinet
+        CFBundleShortVersionString: "0.2.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # Smart View-style linking: the app may look at the local network and
+        # the TV link is verified over the shared Cabinet server.
+        NSLocalNetworkUsageDescription: >-
+          Cabinet uses your local network to verify that your phone and TV are
+          on the same Wi-Fi before syncing ROMs to your library.
+        NSBonjourServiceTypes:
+          - _cabinet._tcp
+        LSSupportsOpeningDocumentsInPlace: true
+        UIFileSharingEnabled: true
+        ITSAppUsesNonExemptEncryption: false
+
+schemes:
+  CabinetApp:
+    build:
+      targets:
+        CabinetApp: all
+    run:
+      config: Debug
+    archive:
+      config: Release

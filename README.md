@@ -6,7 +6,7 @@
 
 > The logo hides its idea in the first letter: the **C** of Cabinet is the
 > universal power symbol — a circle open at the top, a stem through the gap.
-> A letter, and the button that powers on your library.
+> A letter, and the button that powers on your library.
 
 A modern, self-hostable game library for **web, Windows and TV** — curated cover
 art, instant search, an encrypted admin vault, and a controller-first living-room
@@ -19,9 +19,9 @@ mode.
 [![Next.js](https://img.shields.io/badge/Next.js%2014-black?logo=next.js&logoColor=white)](https://nextjs.org)
 [![Neon Postgres](https://img.shields.io/badge/Neon-Postgres-00e599?logo=postgresql&logoColor=white)](https://neon.tech)
 
-[**Explore the demo**](https://cabinet.vercel.app) ·
+[**Explore the demo**](https://cabinet-eta-gilt.vercel.app) ·
 [**Download for Windows**](https://github.com/cabinet-roms/cabinet/releases/latest) ·
-[**TV Mode**](https://cabinet.vercel.app/tv) ·
+[**TV Mode**](https://cabinet-eta-gilt.vercel.app/tv) ·
 [**Architecture**](docs/ARCHITECTURE.md) ·
 [**TV & controllers**](docs/TV-PLAY.md)
 
@@ -67,9 +67,10 @@ Key-protected admin dashboard; on desktop
 the key lives in an **AES-256-GCM vault**
 that opens only with your master passphrase.
 
-**🧩 Emulators, coming soon**
-A dedicated section is already in the
-menu — in-browser cores land next.
+**🧩 Play in the browser**
+EmulatorJS WASM cores run your library in
+the tab — with cloud save states, screenshots
+and netplay built in.
 
 </td>
 </tr>
@@ -126,6 +127,25 @@ npm run dist                                      # → release/Cabinet-Setup-*.
 
 See [apps/desktop/README.md](apps/desktop/README.md) for packaging and signing.
 
+### Android app (.apk) & iOS app (.ipa)
+
+```bash
+# Android — headless build (JDK 17 + Android SDK via scripts/setup-android-toolchain.sh)
+bash scripts/build-android.sh
+# → apps/android/app/build/outputs/apk/debug/app-debug.apk
+
+# iOS — must be built on a Mac with Xcode (see apps/ios/README.md)
+cd apps/ios && ./build-ipa.sh   # → build/ipa/Cabinet.ipa
+```
+
+Both phone apps run the Cabinet web app in a native shell plus two native
+screens. **Link TV** pairs the phone with the TV app Smart View-style: the TV
+shows a 6-digit code, the TV approves the phone, and the server verifies both
+devices are on the same Wi-Fi (matching egress IPs). **ROMs** scans a
+user-chosen folder for ROM files (zipped archives included) and auto-imports
+them into the shared library — while the TV link verifies the same network —
+so games show up on the TV with no further steps.
+
 ## The admin key vault
 
 The admin dashboard is locked behind a key-password on **both** surfaces. On
@@ -180,12 +200,12 @@ tools/keyvault  CLI: generate / seal / reveal / hash the admin key
 - [x] Encrypted admin key vault (desktop window + CLI)
 - [x] TV Mode with gamepad navigation (two controllers)
 - [x] Dependabot + CI + dependency review
-- [ ] Emulators section: in-browser WASM cores (EmulatorJS)
-- [ ] Desktop emulator profiles & one-click launch
-- [ ] Metadata providers (IGDB, ScreenScraper) & ROM scanning on the server
-- [ ] Save states, screenshots and play history sync
-- [ ] Tizen web app packaging for Samsung TV
-- [ ] Netplay
+- [x] Emulators section: in-browser WASM cores (EmulatorJS)
+- [x] Desktop emulator profiles & one-click launch
+- [x] Metadata providers (IGDB, ScreenScraper) & ROM scanning on the server
+- [x] Save states, screenshots and play history sync
+- [x] Tizen web app packaging for Samsung TV
+- [x] Netplay
 
 ## Security
 

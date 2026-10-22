@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { RomCover } from "../RomCover";
 import { AchievementsPanel } from "../achievements/Achievements";
@@ -77,10 +78,14 @@ export function RomModal({
                   {coverProviderLabel(rom.coverProvider)}
                 </p>
                 <div className="mt-5 grid grid-cols-2 gap-2.5">
-                  <button type="button" className="btn-primary !px-4 !py-2.5 text-xs">
+                  <Link
+                    href={`/play?rom=${rom.id}`}
+                    className="btn-primary !px-4 !py-2.5 text-xs"
+                    onClick={onClose}
+                  >
                     <PlayIcon size={14} />
                     Play
-                  </button>
+                  </Link>
                   <button type="button" className="btn-glass !px-4 !py-2.5 text-xs">
                     <DownloadIcon size={14} />
                     Download
@@ -88,7 +93,7 @@ export function RomModal({
                 </div>
                 <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[10px] text-white/40">
                   <SparklesIcon size={11} />
-                  In-browser emulation arrives in the Emulators update
+                  Cloud save states, screenshots & netplay included
                 </p>
               </div>
 

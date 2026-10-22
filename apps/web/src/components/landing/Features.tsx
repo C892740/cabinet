@@ -56,9 +56,9 @@ const features: {
     accent: "from-indigo-400 to-violet-600",
   },
   {
-    title: "Emulators, coming soon",
+    title: "Play in the browser",
     description:
-      "A dedicated Emulators section is already in the menu. In-browser play and desktop emulator launching land in a future release.",
+      "EmulatorJS WASM cores run your games right in the tab — with cloud save states, screenshots, play history and netplay.",
     icon: CpuIcon,
     accent: "from-pink-400 to-purple-600",
   },

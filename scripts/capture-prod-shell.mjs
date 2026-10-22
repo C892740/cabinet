@@ -1,0 +1,14 @@
+import { chromium } from "playwright";
+const base = process.argv[2];
+const shell = process.argv[3] ?? "ps2";
+if (!base) throw new Error("usage: node scripts/capture-prod-shell.mjs <baseURL> <shellId>");
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
+const errors = [];
+page.on("pageerror", (err) => errors.push(String(err).slice(0, 300)));
+await page.addInitScript((id) => window.localStorage.setItem("cabinet.shell", id), shell);
+await page.goto(`${base}/shell`, { waitUntil: "networkidle" });
+await page.waitForTimeout(2500);
+await page.screenshot({ path: `artifacts/shells/prod-${shell}.png` });
+console.log(`captured prod-${shell}.png | pageerrors: ${errors.length === 0 ? "none" : errors.join(" | ")}`);
+await browser.close();

@@ -112,20 +112,23 @@ commands.
 | **Admin key at rest** | A readable password in config is convenient and dangerous | AES-256-GCM vault with authenticated header + scrypt master passphrase (desktop window + CLI) |
 | **CSRF** | Cookie auth is XSS/CSRF-sensitive | `SameSite=Lax`, `HttpOnly`, `Secure` in prod + `Origin` checks on mutations + rate limits on auth endpoints |
 | **Cover art** | Real artwork looks great but isn't ours to ship | Deterministic generated art from platform palettes + title typography — original by construction |
-| **In-browser emulation** | Huge win for UX; WASM cores are heavy | Roadmap (Emulators section placeholder); the API/UI contract already reserves the slot |
+| **In-browser emulation** | Huge win for UX; WASM cores are heavy | Shipped: EmulatorJS (WASM) in an isolated same-origin frame (`/play/frame`), ROM bytes passed as blob URLs; heavier cores (N64, PSX, DS) flagged beta |
 | **TV input** | TV browsers may not expose gamepads | Standard Gamepad API + focus navigation; Tizen packaging is the reliable path (see `docs/TV-PLAY.md`) |
 
 ---
 
 ## 4. Scaling notes (future you)
 
-1. **Scanning/matching** — run as a background job queue (Redis/BullMQ or a
-   Vercel cron + queue) with WebSocket progress, exactly like RomM's scan runs.
-2. **Metadata providers** (IGDB, ScreenScraper…) — implement behind a
-   `MetadataProvider` interface in `packages/core` so providers are pluggable.
+1. **Scanning/matching** — shipped as client-side hashing + a serial server-side
+   matcher (`lib/metadata`); the next step is a background job queue (Redis/BullMQ
+   or a Vercel cron + queue) with WebSocket progress for very large libraries.
+2. **Metadata providers** (IGDB, ScreenScraper…) — shipped in `apps/web/src/lib/metadata`
+   behind a shared match pipeline; more providers (SteamGridDB, RetroAchievements
+   covers) slot into the same shape.
 3. **File storage** — ROMs stay on user disks (desktop) or R2/S3-compatible
    object storage (web streaming); the DB stores metadata + hashes only.
 4. **Multi-tenant / friends** — `users`, `collections` and `sessions` already
    support ownership; add a `shares` table for friend libraries.
-5. **Emulator cores** — EmulatorJS (WASM) in the browser; local emulator
-   profiles on desktop (already stubbed: `emulator:launch` IPC).
+5. **Emulator cores** — shipped: EmulatorJS (WASM) in the browser with cloud
+   save states and netplay; desktop emulator profiles launch local emulators
+   through the `emulator:launch` IPC.

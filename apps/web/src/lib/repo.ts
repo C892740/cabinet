@@ -81,12 +81,15 @@ export interface Repo {
   stats(): Promise<AdminStats>;
 }
 
-let cached: Repo | null = null;
+// The singleton lives on globalThis: Next dev (and any multi-bundle runtime)
+// gives each route its own module instance, and a module-level cache would
+// split the demo state — and the session store — across routes.
+const store = globalThis as typeof globalThis & { __cabinetRepo?: Repo };
 
 export function getRepo(): Repo {
-  if (cached) return cached;
-  cached = process.env.DATABASE_URL ? createNeonRepo() : createDemoRepo();
-  return cached;
+  if (store.__cabinetRepo) return store.__cabinetRepo;
+  store.__cabinetRepo = process.env.DATABASE_URL ? createNeonRepo() : createDemoRepo();
+  return store.__cabinetRepo;
 }
 
 // ─── Demo implementation ────────────────────────────────────────────────────
@@ -224,7 +227,10 @@ function createDemoRepo(): Repo {
 
     async findUserById(id) {
       const user = users.get(id);
-      return user ?? null;
+      if (!user) return null;
+      // Never hand the password hash to callers of the public User shape.
+      const { passwordHash: _pw, ...safe } = user;
+      return safe;
     },
 
     async createUser(input) {
@@ -238,7 +244,8 @@ function createDemoRepo(): Repo {
         passwordHash: input.passwordHash,
       };
       users.set(user.id, user);
-      return user;
+      const { passwordHash: _pw, ...safe } = user;
+      return safe;
     },
 
     async listUsers() {

@@ -13,6 +13,7 @@ export const platforms: Platform[] = [
   { id: "p_snes", slug: "snes", name: "Super Nintendo", shortName: "SNES", manufacturer: "Nintendo", releaseYear: 1990, colorA: "#7c5cff", colorB: "#3b2c8a" },
   { id: "p_gb", slug: "gb", name: "Game Boy", shortName: "GB", manufacturer: "Nintendo", releaseYear: 1989, colorA: "#2ecc71", colorB: "#145f40" },
   { id: "p_gba", slug: "gba", name: "Game Boy Advance", shortName: "GBA", manufacturer: "Nintendo", releaseYear: 2001, colorA: "#9b59ff", colorB: "#4b2c9e" },
+  { id: "p_nds", slug: "nds", name: "Nintendo DS", shortName: "NDS", manufacturer: "Nintendo", releaseYear: 2004, colorA: "#4aa3df", colorB: "#215a80" },
   { id: "p_genesis", slug: "genesis", name: "Mega Drive / Genesis", shortName: "GEN", manufacturer: "Sega", releaseYear: 1988, colorA: "#2e86de", colorB: "#17406e" },
   { id: "p_n64", slug: "n64", name: "Nintendo 64", shortName: "N64", manufacturer: "Nintendo", releaseYear: 1996, colorA: "#f39c12", colorB: "#8a5a10" },
   { id: "p_psx", slug: "psx", name: "PlayStation", shortName: "PS1", manufacturer: "Sony", releaseYear: 1994, colorA: "#636e94", colorB: "#2b3247" },

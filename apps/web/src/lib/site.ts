@@ -9,7 +9,7 @@ export const site = {
   description:
     "Cabinet is a modern, self-hostable game library: curated cover art, instant search, an admin vault, and a controller-first TV mode — on the web, on Windows, and in your living room.",
   repoUrl: "https://github.com/cabinet-roms/cabinet",
-  appUrl: "https://cabinet.vercel.app",
+  appUrl: "https://cabinet-eta-gilt.vercel.app",
   downloadUrl: "https://github.com/cabinet-roms/cabinet/releases/latest",
   author: "Cabinet contributors",
 } as const;

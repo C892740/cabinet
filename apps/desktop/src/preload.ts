@@ -20,6 +20,7 @@ export interface CabinetApi {
   pickFile(filters: { name: string; extensions: string[] }[]): Promise<string | null>;
   pickDirectory(): Promise<string | null>;
   pickSave(defaultName: string): Promise<string | null>;
+  pickRomFile(): Promise<string | null>;
   generateKey(): Promise<string>;
   inspectVault(filePath: string): Promise<VaultHeader>;
   sealVault(input: {
@@ -33,7 +34,13 @@ export interface CabinetApi {
   launchEmulator(input: {
     emulatorPath: string;
     romPath: string;
+    /** Expanded argument list from the profile's args template. */
+    args?: string[];
   }): Promise<{ ok: boolean; error?: string }>;
+  /** Fires when a launched emulator exits; returns an unsubscribe function. */
+  onEmulatorExit(
+    callback: (info: { emulatorPath: string; code: number | null }) => void,
+  ): () => void;
   unlockAdmin(key: string): Promise<{ ok: boolean; error?: string }>;
   navigate(target: string): Promise<void>;
   openExternal(url: string): Promise<void>;
@@ -49,6 +56,15 @@ const api: CabinetApi = {
   revealVault: (input) => ipcRenderer.invoke("keyvault:reveal", input),
   scanRoms: (directory) => ipcRenderer.invoke("roms:scan", directory),
   launchEmulator: (input) => ipcRenderer.invoke("emulator:launch", input),
+  onEmulatorExit: (callback) => {
+    const listener = (
+      _event: Electron.IpcRendererEvent,
+      info: { emulatorPath: string; code: number | null },
+    ) => callback(info);
+    ipcRenderer.on("emulator:exited", listener);
+    return () => ipcRenderer.removeListener("emulator:exited", listener);
+  },
+  pickRomFile: () => ipcRenderer.invoke("dialog:pickFile", [{ name: "ROM files", extensions: ["zip", "nes", "sfc", "smc", "gb", "gbc", "gba", "gen", "md", "bin", "cue", "iso", "chd", "n64", "z64", "v64", "gg", "sms", "nds"] }]),
   unlockAdmin: (key) => ipcRenderer.invoke("admin:unlock", key),
   navigate: (target) => ipcRenderer.invoke("app:navigate", target),
   openExternal: (url) => ipcRenderer.invoke("app:openExternal", url),

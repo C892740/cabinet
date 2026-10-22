@@ -28,7 +28,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
   }
   const body = (await request.json().catch(() => null)) as Partial<NewRom> | null;
-  if (!body?.title?.trim() || !body.platformSlug || !body.year || !body.genre?.trim()) {
+  if (
+    !body?.title?.trim() ||
+    !body.platformSlug ||
+    body.year === undefined ||
+    body.year === null ||
+    !body.genre?.trim()
+  ) {
     return NextResponse.json(
       { ok: false, error: "title, platformSlug, year and genre are required" },
       { status: 400 },

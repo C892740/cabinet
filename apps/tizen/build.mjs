@@ -23,9 +23,16 @@ function arg(name, fallback) {
   return fallback;
 }
 
-const url = arg("url", process.env.CABINET_TV_URL ?? "https://cabinet.vercel.app/tv");
+const url = arg("url", process.env.CABINET_TV_URL ?? "https://cabinet-eta-gilt.vercel.app/tv");
 const origin = new URL(url).origin;
 const { version } = JSON.parse(readFileSync(path.join(here, "package.json"), "utf8"));
+
+// The deployment URL baked into the checked-in sources. Substitution is
+// two-step (full URL, then bare host) so iframe sources, <access> origins and
+// the allow-navigation host list all end up pointing at the same deployment.
+const SOURCE_URL = "https://cabinet-eta-gilt.vercel.app/tv";
+const sourceHost = new URL(SOURCE_URL).host;
+const targetHost = new URL(url).host;
 
 // 1) Stage exactly what the widget contains, baking in the deployment URL.
 const stage = path.join(here, "release", "stage");
@@ -34,7 +41,8 @@ mkdirSync(stage, { recursive: true });
 
 for (const file of ["config.xml", "index.html"]) {
   const templated = readFileSync(path.join(here, file), "utf8")
-    .replaceAll("https://cabinet.vercel.app/tv", url)
+    .replaceAll(SOURCE_URL, url)
+    .replaceAll(sourceHost, targetHost)
     .replaceAll("https://*.vercel.app", origin);
   writeFileSync(path.join(stage, file), templated);
 }

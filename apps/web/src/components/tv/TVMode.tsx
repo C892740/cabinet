@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { CoverArt } from "../CoverArt";
 import { GamepadIcon, Logo, PlayIcon, SearchIcon, TvIcon } from "./tv-exports";
+import { GamepadNavMap, PadGlyph } from "./GamepadNavMap";
+import { PhoneLinkBadge, PhonePairPanel } from "./PhonePairPanel";
 import type { Platform, Rom } from "@/lib/types";
 
 /**
@@ -111,8 +113,22 @@ export function TVMode({
 }) {
   const padCount = useGamepadCount();
   const [selected, setSelected] = useState<Rom | null>(null);
-  const onBack = useMemo(() => () => setSelected(null), []);
+  const [pairOpen, setPairOpen] = useState(false);
+  const onBack = useMemo(() => () => {
+    setPairOpen(false);
+    setSelected(null);
+  }, []);
   useGamepadNavigation(onBack);
+
+  // Put the panel's Play button under the gamepad cursor when a game opens:
+  // tile → A → A plays, B backs out.
+  useEffect(() => {
+    if (!selected) return;
+    const timer = window.setTimeout(() => {
+      document.querySelector<HTMLElement>("[data-tv-autofocus]")?.focus();
+    }, 60);
+    return () => window.clearTimeout(timer);
+  }, [selected]);
 
   const platformBySlug = useMemo(
     () => new Map(platforms.map((p) => [p.slug, p])),
@@ -153,6 +169,7 @@ export function TVMode({
               ? `${padCount} controller${padCount > 1 ? "s" : ""} connected`
               : "Press a button on your controller"}
           </span>
+          <PhoneLinkBadge onOpen={() => setPairOpen(true)} />
           <span className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm text-white/75">
             <TvIcon size={16} />
             TV Mode
@@ -231,26 +248,34 @@ export function TVMode({
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="accent-gradient inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-glow">
+              <Link
+                href={`/play?rom=${selected.id}&source=tv`}
+                data-tv-focusable
+                data-tv-autofocus
+                className="accent-gradient inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-glow outline-none transition-transform duration-200 focus-visible:scale-[1.05]"
+              >
                 <PlayIcon size={16} />
-                Play (A)
-              </span>
+                Play
+                <PadGlyph kind="cross" size={15} />
+              </Link>
               <button
                 type="button"
                 onClick={() => setSelected(null)}
                 data-tv-focusable
-                className="glass rounded-full px-6 py-3 text-sm font-medium text-white/80"
+                className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white/80 outline-none transition-transform duration-200 focus-visible:scale-[1.05]"
               >
-                Back (B)
+                Back
+                <PadGlyph kind="circle" size={15} />
               </button>
             </div>
           </div>
         </motion.div>
       )}
 
-      <footer className="mt-16 px-8 pb-6 text-center text-sm text-white/35 sm:px-12">
-        Navigate with the d-pad or left stick · A selects · B goes back · up to four
-        controllers supported
+      {pairOpen && <PhonePairPanel onClose={() => setPairOpen(false)} />}
+
+      <footer className="mt-16 px-8 pb-6 sm:px-12">
+        <GamepadNavMap />
       </footer>
     </div>
   );

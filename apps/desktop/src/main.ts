@@ -32,7 +32,7 @@ import {
   serializeVault,
 } from "@cabinet/core";
 
-const APP_URL = process.env.CABINET_APP_URL ?? "https://cabinet.vercel.app";
+const APP_URL = process.env.CABINET_APP_URL ?? "https://cabinet-eta-gilt.vercel.app";
 const WINDOWS_DIR = path.join(__dirname, "..", "windows");
 
 const ROM_EXTENSIONS = [
@@ -59,11 +59,51 @@ function createMainWindow(): BrowserWindow {
     },
   });
 
-  void mainWindow.loadURL(APP_URL);
+  wireAppFallback(mainWindow);
+  mainWindow.loadURL(APP_URL).catch(() => undefined); // fallback page handles it
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
   return mainWindow;
+}
+
+/**
+ * The shell is only as good as the deployment it points at. When the app can't
+ * load — offline, DNS failure, or a host error page like Vercel's "The
+ * deployment is unavailable" — show a friendly local page with a retry
+ * instead of a blank or broken window.
+ */
+let fallbackWired = false;
+
+function showUnavailable(win: BrowserWindow, detail: string): void {
+  if (win.isDestroyed()) return;
+  void win.loadFile(path.join(WINDOWS_DIR, "unavailable.html"), {
+    search: new URLSearchParams({ detail, appUrl: APP_URL }).toString(),
+  });
+}
+
+function wireAppFallback(win: BrowserWindow): void {
+  // Network-level failures (offline, DNS, connection refused).
+  win.webContents.on(
+    "did-fail-load",
+    (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+      if (!isMainFrame || errorCode === -3) return; // -3 = aborted navigation, normal
+      showUnavailable(win, `${validatedURL} — ${errorDescription} (code ${errorCode})`);
+    },
+  );
+
+  if (fallbackWired) return;
+  fallbackWired = true;
+  // Host-level error pages (404/451/5xx) load "successfully" — catch them at
+  // the HTTP layer. Only the root document counts: an in-app 404 route is a
+  // normal page rendered by the web app itself.
+  const origin = new URL(APP_URL).origin;
+  session.defaultSession.webRequest.onCompleted({ urls: [`${origin}/*`] }, (details) => {
+    if (details.resourceType !== "mainFrame" || details.statusCode < 400) return;
+    if (new URL(details.url).pathname !== "/") return;
+    if (!mainWindow || mainWindow.isDestroyed()) return;
+    showUnavailable(mainWindow, `${details.url} — HTTP ${details.statusCode}`);
+  });
 }
 
 function createToolWindow(file: string, title: string, size = { width: 720, height: 760 }) {
@@ -169,12 +209,27 @@ ipcMain.handle("roms:scan", async (_event, directory: string) => {
 
 ipcMain.handle(
   "emulator:launch",
-  async (_event, input: { emulatorPath: string; romPath: string }) => {
+  async (
+    _event,
+    input: { emulatorPath: string; romPath: string; args?: string[] },
+  ) => {
     try {
-      const child = spawn(input.emulatorPath, [input.romPath], {
+      // Profile-driven launch: the renderer expands the profile's args template
+      // ({rom} {core} {emulator} {title}); fall back to plain "emulator rom".
+      const args = input.args?.length ? input.args : [input.romPath];
+      const child = spawn(input.emulatorPath, args, {
         detached: true,
         stdio: "ignore",
         shell: false,
+      });
+      child.on("error", () => undefined);
+      // Tell the renderer when the emulator exits so it can close the play
+      // session (history sync measures real play time, not guesswork).
+      child.on("exit", (code) => {
+        mainWindow?.webContents.send("emulator:exited", {
+          emulatorPath: input.emulatorPath,
+          code,
+        });
       });
       child.unref();
       return { ok: true };

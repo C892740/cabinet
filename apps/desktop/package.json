@@ -46,14 +46,17 @@
           ]
         }
       ],
-      "artifactName": "Cabinet-Setup-${version}.exe",
       "signAndEditExecutable": false
     },
     "npmRebuild": false,
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "shortcutName": "Cabinet"
+      "shortcutName": "Cabinet",
+      "artifactName": "Cabinet-Setup-${version}.exe"
+    },
+    "portable": {
+      "artifactName": "Cabinet-Portable-${version}.exe"
     }
   }
 }

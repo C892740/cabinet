@@ -1,98 +1,153 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CpuIcon, GamepadIcon, SparklesIcon, TvIcon } from "@/components/Icons";
+import { CpuIcon, GamepadIcon, SparklesIcon } from "@/components/Icons";
+import { ScanPanel } from "@/components/emulator/ScanPanel";
+import { ProfilesPanel } from "@/components/emulator/ProfilesPanel";
+import { CORE_BY_PLATFORM, DESKTOP_ONLY_PLATFORMS } from "@/lib/emulator-cores";
 
 export const metadata: Metadata = {
-  title: "Emulators",
-  description: "The Emulators section is coming to Cabinet — a dedicated home for cores, profiles and play sessions.",
+  title: "Emulators — Cabinet",
+  description:
+    "In-browser WASM cores, desktop emulator profiles, server-side ROM scanning, cloud saves and netplay.",
 };
 
-const roadmap = [
+export const dynamic = "force-dynamic";
+
+const WINGS = [
   {
     title: "In-browser play",
     description:
-      "WebAssembly emulator cores (EmulatorJS) so any supported game opens with one click — saves and states sync to your account.",
-    status: "Planned",
+      "EmulatorJS WASM cores — pick a game and it opens instantly, with cloud save states, screenshots and play history synced to your account.",
+    icon: <GamepadIcon size={20} />,
   },
   {
     title: "Desktop emulator profiles",
     description:
-      "Point Cabinet Desktop at your favourite emulators and launch ROMs directly, with per-platform defaults.",
-    status: "Planned",
+      "Point Cabinet Desktop at RetroArch or any standalone emulator: per-platform profiles with core and argument templates, and one-click launch.",
+    icon: <CpuIcon size={20} />,
   },
   {
-    title: "Save states & screenshots",
+    title: "Server-side ROM scanning",
     description:
-      "Server-side save states, per-user progress and screenshot galleries attached to every game.",
-    status: "Planned",
+      "Files are hashed locally; Cabinet matches them against ScreenScraper and IGDB on the server and imports games with real box art — credentials never reach your browser.",
+    icon: <SparklesIcon size={20} />,
   },
   {
     title: "Netplay",
     description:
-      "Room-based multiplayer so you and your friends can share a session from different devices.",
-    status: "Exploring",
+      "Share a 5-character room code and a friend plays your game over a direct peer-to-peer stream, controls forwarded to the host — remote couch co-op.",
+    icon: <GamepadIcon size={20} />,
   },
 ];
 
 export default function EmulatorsPage() {
+  const cores = Object.entries(CORE_BY_PLATFORM);
   return (
-    <div className="max-w-4xl">
-      <div className="glass relative overflow-hidden rounded-4xl px-8 py-12 sm:px-12">
+    <div className="max-w-5xl">
+      <div className="glass relative overflow-hidden rounded-4xl px-8 py-10 sm:px-12">
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-violet-600/25 blur-3xl" />
         <div className="relative">
           <span className="accent-gradient inline-flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-glow">
             <CpuIcon size={27} />
           </span>
           <h1 className="mt-6 text-3xl font-semibold tracking-[-0.025em] text-white sm:text-4xl">
-            The Emulators wing is under construction.
+            The Emulators wing is open.
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/60">
-            Cabinet is a library first — but this menu item already has a home. Future
-            updates add emulator cores, launch profiles and play sessions in their own
-            section, right where this placeholder sits.
+            Play in the browser, launch on the desktop, scan your library against the big
+            metadata databases, and take your saves everywhere. Cabinet ships no games —
+            bring your own legally obtained ROMs.
           </p>
-
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/library" className="btn-primary">
               <SparklesIcon size={16} />
-              Back to the library
-            </Link>
-            <Link href="/tv" className="btn-glass">
-              <TvIcon size={16} />
-              See TV Mode
+              Pick a game to play
             </Link>
           </div>
         </div>
       </div>
 
-      <h2 className="mt-14 text-xl font-semibold tracking-tight text-white">Roadmap</h2>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {roadmap.map((item) => (
-          <div key={item.title} className="glass glass-hover rounded-3xl p-6">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="font-semibold tracking-tight text-white">{item.title}</h3>
-              <span
-                className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                  item.status === "Exploring"
-                    ? "bg-sky-400/15 text-sky-200"
-                    : "bg-violet-400/15 text-violet-200"
-                }`}
-              >
-                {item.status}
-              </span>
-            </div>
-            <p className="mt-2.5 text-sm leading-relaxed text-white/55">{item.description}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="glass mt-8 flex items-center gap-4 rounded-3xl p-6">
-        <GamepadIcon size={22} className="shrink-0 text-violet-300" />
-        <p className="text-sm text-white/60">
-          Got opinions about emulator support? The roadmap lives in the GitHub repository —
-          issues and feature requests are how this section gets prioritised.
+      <section className="mt-12">
+        <h2 className="text-xl font-semibold tracking-tight text-white">In-browser WASM cores</h2>
+        <p className="mt-1 text-sm text-white/55">
+          Powered by EmulatorJS — one click from the library, no install. Blue cores are
+          rock-solid; violet cores are playable but rougher.
         </p>
-      </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {cores.map(([slug, info]) => (
+            <div key={slug} className="glass glass-hover rounded-2xl p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white">{info.label}</h3>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                    info.status === "stable"
+                      ? "bg-sky-400/15 text-sky-200"
+                      : "bg-violet-400/15 text-violet-200"
+                  }`}
+                >
+                  {info.status}
+                </span>
+              </div>
+              <p className="mt-1.5 text-xs text-white/50">
+                core <code className="text-white/70">{info.core}</code> · {info.backend}
+              </p>
+              <p className="mt-1 text-[11px] text-white/40">
+                .{info.extensions.slice(0, 4).join(" .")}
+              </p>
+              {info.bios && <p className="mt-2 text-[11px] text-amber-200/70">⚠ {info.bios}</p>}
+              <Link
+                href={`/library?platform=${slug}`}
+                className="mt-3 inline-flex rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-white hover:bg-white/20"
+              >
+                Pick a game →
+              </Link>
+            </div>
+          ))}
+          {Object.entries(DESKTOP_ONLY_PLATFORMS).map(([slug, note]) => (
+            <div key={slug} className="glass rounded-2xl p-4 opacity-80">
+              <h3 className="text-sm font-semibold text-white">{slug.toUpperCase()}</h3>
+              <p className="mt-1.5 text-xs leading-relaxed text-white/50">{note}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <h2 className="text-xl font-semibold tracking-tight text-white">Library scanning</h2>
+        <p className="mt-1 text-sm text-white/55">
+          Hash locally, match on the server (ScreenScraper + IGDB), import with real covers.
+        </p>
+        <div className="glass mt-5 rounded-3xl p-6">
+          <ScanPanel />
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <h2 className="text-xl font-semibold tracking-tight text-white">Desktop emulator profiles</h2>
+        <p className="mt-1 text-sm text-white/55">
+          One-click launch from Cabinet Desktop — per-platform defaults, core + argument templates.
+        </p>
+        <div className="glass mt-5 rounded-3xl p-6">
+          <ProfilesPanel />
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <h2 className="text-xl font-semibold tracking-tight text-white">Everything else</h2>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          {WINGS.map((item) => (
+            <div key={item.title} className="glass glass-hover rounded-3xl p-6">
+              <div className="flex items-center gap-3">
+                <span className="accent-gradient inline-flex h-10 w-10 items-center justify-center rounded-xl text-white">
+                  {item.icon}
+                </span>
+                <h3 className="font-semibold tracking-tight text-white">{item.title}</h3>
+              </div>
+              <p className="mt-2.5 text-sm leading-relaxed text-white/55">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

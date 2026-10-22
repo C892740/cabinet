@@ -15,7 +15,7 @@ const highlights = [
   "Big, legible tiles designed for a 10-foot screen",
   "D-pad and stick navigation with focus rings",
   "Two controllers supported out of the box",
-  "Samsung TV (Tizen) packaging on the roadmap",
+  "Ships as a Samsung TV (Tizen) app package",
 ];
 
 export function TVSection() {

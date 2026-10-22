@@ -22,6 +22,27 @@
       "when": 1792545242100,
       "tag": "0002_hot_wildside",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792572613147,
+      "tag": "0003_deep_songbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792604513751,
+      "tag": "0004_military_the_watchers",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792661282153,
+      "tag": "0005_daily_whiplash",
+      "breakpoints": true
     }
   ]
 }

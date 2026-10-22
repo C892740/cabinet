@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { TVMode } from "@/components/tv/TVMode";
+import { TizenKeyForwarder } from "@/components/tv/TizenKeyForwarder";
 import { getRepo } from "@/lib/repo";
 
 export const metadata: Metadata = {
@@ -13,5 +14,10 @@ export const dynamic = "force-dynamic";
 export default async function TVPage() {
   const repo = getRepo();
   const [roms, platforms] = await Promise.all([repo.listRoms(), repo.listPlatforms()]);
-  return <TVMode roms={roms} platforms={platforms} />;
+  return (
+    <>
+      <TizenKeyForwarder />
+      <TVMode roms={roms} platforms={platforms} />
+    </>
+  );
 }

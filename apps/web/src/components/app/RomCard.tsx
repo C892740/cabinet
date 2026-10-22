@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { RomCover } from "../RomCover";
 import { DownloadIcon, HeartIcon, PlayIcon } from "../Icons";
@@ -77,6 +78,18 @@ export function RomCard({
           </div>
         </div>
       </button>
+
+      {/* Direct play shortcut — overlays the decorative badge from the card. */}
+      <Link
+        href={`/play?rom=${rom.id}`}
+        aria-label={`Play ${rom.title}`}
+        className="focus-ring absolute bottom-3 left-3 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <span className="accent-gradient inline-flex h-10 w-10 items-center justify-center rounded-full text-white shadow-glow">
+          <PlayIcon size={16} />
+        </span>
+      </Link>
 
       <div className="mt-3 flex items-start gap-2 px-1">
         <div className="min-w-0 flex-1">

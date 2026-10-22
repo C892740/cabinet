@@ -31,3 +31,7 @@ Thumbs.db
 npm-debug.log*
 .vercel
 .env*
+
+# build-tool caches (SwiftPM, Gradle)
+.build/
+.gradle/

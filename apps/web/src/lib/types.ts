@@ -13,4 +13,22 @@ export type {
   Achievement,
   AchievementSummary,
   AchievementSet,
+  // Emulation + gameplay sync
+  EmulatorCoreId,
+  PlaySource,
+  SaveState,
+  Screenshot,
+  PlaySession,
+  EmulatorProfile,
+  // Netplay
+  NetplayRole,
+  NetplayStatus,
+  NetplaySessionInfo,
+  NetplaySignal,
+  // Metadata providers + scanning
+  MetadataProvider,
+  MatchMethod,
+  ProvidersStatus,
+  ScannedRomFile,
+  MetadataMatch,
 } from "@cabinet/core";
