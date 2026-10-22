@@ -1,0 +1,59 @@
+name: Windows desktop build
+
+# Builds the Cabinet desktop installer (NSIS + portable) on a Windows runner
+# and attaches it to a GitHub release. Windows-native on purpose: the NSIS
+# target generates its uninstaller through wine when cross-built on Linux,
+# which is slow and fragile — here it is just a native build.
+#
+# Run manually: Actions → Windows desktop build → Run workflow → tag (v0.2.0).
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to attach the installers to (e.g. v0.2.0)"
+        required: true
+        default: "v0.2.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build Cabinet-Setup exe
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build shared packages
+        run: |
+          npm run build -w @cabinet/core
+          npm run build -w @cabinet/db
+
+      - name: Typecheck desktop app
+        run: npm run typecheck -w cabinet-desktop
+
+      - name: Build installers (NSIS + portable)
+        run: npm run dist -w cabinet-desktop
+
+      - name: Attach installers to the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ inputs.tag }}" \
+            apps/desktop/release/Cabinet-Setup-*.exe \
+            apps/desktop/release/Cabinet-Portable-*.exe \
+            --clobber
