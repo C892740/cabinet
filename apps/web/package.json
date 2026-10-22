@@ -16,7 +16,7 @@
     "@cabinet/db": "*",
     "drizzle-orm": "^0.36.3",
     "framer-motion": "^11.11.9",
-    "next": "^14.2.32",
+    "next": "^16.3.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
